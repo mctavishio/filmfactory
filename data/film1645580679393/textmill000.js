@@ -148,7 +148,7 @@ colorsets = pigmentsets.map(set => {
 });
 
 const fps=24; // frames per second for ffmpeg
-const tpc=2*fps; // ticks per colorset
+const tpc=1*fps; // ticks per colorset
 const nticks=tpc*colorsets.length; 
 const nseconds = nticks/fps;
 let filmdir = "film" + timestamp;
@@ -232,16 +232,14 @@ let numbers = [...Array(10).keys()].map(n=>n.toString());
 			opacity=1.0;
 		}
 		doc.font("Courier-Bold");
-		let text = `mctavish`;
+		let text = `film factory`;
 		// let fsize = p.width/(text.length + 2);
-		// let fsize = 128;
-		let fsize = (4/3)*p.width/(text.length + 2);
-		console.log(`fsize = ${fsize}`);
+		let fsize = 128;
 		doc.fontSize(fsize);
 		let color = p.colors[tools.randominteger(0,p.colors.length)];
 		doc.fillOpacity(opacity).strokeOpacity(opacity).fillColor(pigments.red,opacity).strokeColor(pigments.red,opacity).text(text,p.width*.1,p.height*.2,{width:p.width*0.8,height:p.height});
-		//doc.moveDown();
-		//doc.fontSize(fsize*0.8).text(`#${timestamp}`);
+		doc.moveDown();
+		doc.fontSize(fsize*0.6).text(`#${timestamp}`);
 		doc.end();
 	})
 	return layers;

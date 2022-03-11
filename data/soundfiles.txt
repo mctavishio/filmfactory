@@ -1,0 +1,2 @@
+/Users/mctavish/Documents/nodes/soundfactory/data/rubbedpianoharp/rubbedpianoharp_1642096253276/rubbedpianoharp0_thread_simple_all.mp3
+play mctvox1_twist_all_thread_003_echo_reverb.mp3 mctvox1_twist_all_thread_002_echo_reverb.mp3

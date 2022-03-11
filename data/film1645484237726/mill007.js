@@ -1,10 +1,9 @@
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
-const path = require('path');
-const millfile = path.basename(__filename);
 const tools = require("./tools.js");
 const prefix = "film";
-const colorfile = "pigments_bw";
+const millfile = "mill007.js";
+const colorfile = "pigments_bwyr";
 const datetime = new Date();
 const timestamp = datetime.getTime();
 const datetimestr = datetime.toDateString();
@@ -20,11 +19,11 @@ const pigments= {
 };
 const layersmill = [
 	{ nrects: 1, nlines: 0, ncircles: 0 },
-	{ nrects: 0, nlines: 5, ncircles: 0 },
-	{ nrects: 0, nlines: 5, ncircles: 0 },
-	{ nrects: 0, nlines: 5, ncircles: 0 },
-	{ nrects: 0, nlines: 5, ncircles: 0 },
-	{ nrects: 0, nlines: 5, ncircles: 0 },
+	{ nrects: 0, nlines: 5, ncircles: 5 },
+	{ nrects: 0, nlines: 5, ncircles: 5 },
+	{ nrects: 0, nlines: 5, ncircles: 5 },
+	{ nrects: 0, nlines: 5, ncircles: 5 },
+	{ nrects: 0, nlines: 5, ncircles: 5 },
 ];
 algorithms = [{
 	id: prefix + "1637362139", //date +%s
@@ -100,7 +99,7 @@ algorithms = [{
 					let dash = tools.randominteger(0.05*min,0.4*min);
 					let space = tools.randominteger(0.1*min,0.4*min);
 					let width=0,height=0;
-					let x=width/2, y=height/2;
+					let x=0, y=0;
 					matrix.push({x,y,width,height,lineWidth:lineWidth[j],dash:dash,space:space,strokeOpacity:0,fillOpacity:1,strokeColor:color1,fillColor:color1});
 					return matrix;
 				}, []);
@@ -139,16 +138,16 @@ algorithms = [{
 ];
 pigmentsets = [
 //	[ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.blue, 0,"blue"], [pigments.yellow, 0,"yellow"], [pigments.red, 2,"red"]],
-//	[ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.blue, 0,"blue"], [pigments.yellow, 1,"yellow"], [pigments.red, 2,"red"]],
+	[ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.blue, 0,"blue"], [pigments.yellow, 1,"yellow"], [pigments.red, 2,"red"]],
 //	[ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.blue, 0,"blue"], [pigments.yellow, 1,"yellow"], [pigments.red, 0,"red"]],
-	[ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.blue, 0,"blue"], [pigments.yellow, 0,"yellow"], [pigments.red, 0,"red"]],
+//	[ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.blue, 0,"blue"], [pigments.yellow, 0,"yellow"], [pigments.red, 0,"red"]],
 ];
 colorsets = pigmentsets.map(set => {
 	return tools.reifyWeightedArray(set);
 });
 
 const fps=24; // frames per second for ffmpeg
-const tpc=2*fps; // ticks per colorset
+const tpc=4*fps; // ticks per colorset
 const nticks=tpc*colorsets.length; 
 const nseconds = nticks/fps;
 let filmdir = "film" + timestamp;
@@ -206,6 +205,15 @@ let numbers = [...Array(10).keys()].map(n=>n.toString());
 					doc.rect(x, y, width, height).strokeColor(strokeColor).dash(dash, {space:space}).lineWidth(lineWidth).stroke();
 				}
 			});
+//			if(ntick===nticks-1) {
+//				doc.font("Courier-Bold");
+//				doc.fontSize(84);
+//				let text = `mctavish : ${datetimeISOstr}`;
+//				// doc.fillColor(p.colors[tools.randominteger(0,p.colors.length)]).text(text,p.width*.1, p.height*.1);
+//				console.log(text); 
+//				let color = p.colors[tools.randominteger(0,p.colors.length)];
+//				doc.fillOpacity(1.0).strokeOpacity(0.0).fillColor(color).strokeColor(color).text(text,p.width*.1, p.height*.1);
+//			}
 			layer.lines.forEach( (line,j) => {
 				let oldline = oldlayer.lines[j];
 				let { x1, x2, y1, y2, lineWidth, dash, space, strokeOpacity, fillOpacity, strokeColor, fillColor } = tools.tweenParameters(oldline,line,fps,nframe);
@@ -221,29 +229,8 @@ let numbers = [...Array(10).keys()].map(n=>n.toString());
 				}
 			});
 		});
-		let opacity=1.0;
-		if(count>nticks*fps-10) {
-			opacity=0.0+(nticks*fps-count)*0.1;
-		}
-		else if(count<10) {
-			opacity=0.0+count*0.1;
-		}
-		else {
-			opacity=1.0;
-		}
-		doc.font("Courier-Bold");
-		let text = `mctavish`;
-		// let fsize = p.width/(text.length + 2);
-		// let fsize = 128;
-		let fsize = (4/3)*p.width/(text.length + 2);
-		console.log(`fsize = ${fsize}`);
-		doc.fontSize(fsize);
-		let color = p.colors[tools.randominteger(0,p.colors.length)];
-		doc.fillOpacity(opacity).strokeOpacity(opacity).fillColor(pigments.red,opacity).strokeColor(pigments.red,opacity).text(text,p.width*.1,p.height*.2,{width:p.width*0.8,height:p.height});
-		//doc.moveDown();
-		//doc.fontSize(fsize*0.8).text(`#${timestamp}`);
 		doc.end();
-	})
+	});
 	return layers;
 },algorithms[1].draw(p));
 
@@ -253,12 +240,11 @@ nextSteps = nextSteps + `
 cd ${filmdir}
 for file in *.pdf; do magick convert $file -resize 1920 $file.png; done;
 for file in *pdf.png; do mv "$file" "$\{file/.pdf.png/.png\}"; done;
-pdfunite film*{24,48,72,96}.pdf book.pdf
+pdfunite film*{00,24,48,72}.pdf book.pdf
 ffmpeg -framerate 24 -i film%06d.png -c:v libx264 -r 24 -pix_fmt yuv420p film.mp4
 touch ${colorfile}
-rm *.png
 cd ..
-echo "file './${filmdir}/film.mp4'" >> filmfiles.txt 
+echo 'file ./${filmdir}/film.mp4' >> filmfiles.txt 
 `;
 nextSteps = nextSteps + `
 cp ${nextstepsfile} ${filmdir}/nextSteps.sh

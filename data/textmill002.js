@@ -27,7 +27,7 @@ const layersmill = [
 	{ nrects: 0, nlines: 5, ncircles: 0 },
 ];
 algorithms = [{
-	id: prefix + "1637362139", //date +%s
+	id: prefix + "1646856640", //date +%s
 	draw: p => {	
 		let width = p.width;
 		let height = p.height;
@@ -232,14 +232,14 @@ let numbers = [...Array(10).keys()].map(n=>n.toString());
 			opacity=1.0;
 		}
 		doc.font("Courier-Bold");
-		let text = `mctavish`;
+		let text = `mctavish 4848`;
 		// let fsize = p.width/(text.length + 2);
 		// let fsize = 128;
-		let fsize = (4/3)*p.width/(text.length + 2);
+		let fsize = (4/3)*p.width/(text.length);
 		console.log(`fsize = ${fsize}`);
 		doc.fontSize(fsize);
 		let color = p.colors[tools.randominteger(0,p.colors.length)];
-		doc.fillOpacity(opacity).strokeOpacity(opacity).fillColor(pigments.red,opacity).strokeColor(pigments.red,opacity).text(text,p.width*.1,p.height*.2,{width:p.width*0.8,height:p.height});
+		doc.fillOpacity(opacity).strokeOpacity(opacity).fillColor(pigments.red,opacity).strokeColor(pigments.red,opacity).text(text,p.width*.0,p.height*.2,{align: 'center', width:p.width,height:p.height});
 		//doc.moveDown();
 		//doc.fontSize(fsize*0.8).text(`#${timestamp}`);
 		doc.end();
@@ -276,5 +276,3 @@ fs.writeFileSync(nextstepsfile, nextSteps, (err) => {
   }
 });
 console.log(__filename);
-
-

@@ -222,11 +222,11 @@ let numbers = [...Array(10).keys()].map(n=>n.toString());
 			});
 		});
 		let opacity=1.0;
-		if(count>nticks*fps-10) {
-			opacity=0.0+(nticks*fps-count)*0.1;
+		if(ntick>nticks-10) {
+			opacity=0.0+(nticks-ntick)*0.1;
 		}
-		else if(count<10) {
-			opacity=0.0+count*0.1;
+		else if(ntick<10) {
+			opacity=0.0+ntick*0.1;
 		}
 		else {
 			opacity=1.0;
@@ -234,12 +234,10 @@ let numbers = [...Array(10).keys()].map(n=>n.toString());
 		doc.font("Courier-Bold");
 		let text = `mctavish`;
 		// let fsize = p.width/(text.length + 2);
-		// let fsize = 128;
-		let fsize = (4/3)*p.width/(text.length + 2);
-		console.log(`fsize = ${fsize}`);
+		let fsize = 124;
 		doc.fontSize(fsize);
 		let color = p.colors[tools.randominteger(0,p.colors.length)];
-		doc.fillOpacity(opacity).strokeOpacity(opacity).fillColor(pigments.red,opacity).strokeColor(pigments.red,opacity).text(text,p.width*.1,p.height*.2,{width:p.width*0.8,height:p.height});
+		doc.fillOpacity(opacity).strokeOpacity(opacity).fillColor(pigments.red,opacity).strokeColor(pigments.red,opacity).text(text,p.width*.2,p.height*.4,{width:p.width*0.8,height:p.height});
 		//doc.moveDown();
 		//doc.fontSize(fsize*0.8).text(`#${timestamp}`);
 		doc.end();

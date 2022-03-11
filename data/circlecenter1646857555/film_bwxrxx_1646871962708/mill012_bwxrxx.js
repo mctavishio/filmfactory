@@ -2,9 +2,10 @@ const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require('path');
 const millfile = path.basename(__filename);
-const tools = require("./tools.js");
+const tools = require("../tools.js");
 const prefix = "film";
-const colorfile = "pigments_bw";
+const pigmentchoice = "bwxrxx";
+const colorfile = `pigments_${pigmentchoice}`;
 const datetime = new Date();
 const timestamp = datetime.getTime();
 const datetimestr = datetime.toDateString();
@@ -18,13 +19,24 @@ const pigments= {
 	gray: "#898988",
 	darkgray: "#4b4b44"
 };
+//bwgryb = black white gray red yellow blue x ::: not present
+pigmentsets = {
+	bwxrxx: [ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.gray, 0,"gray"], [pigments.red, 3,"red"], [pigments.yellow, 0,"yellow"], [pigments.blue, 0,"blue"]],
+	bwxryx: [ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.gray, 0,"gray"], [pigments.red, 2,"red"], [pigments.yellow, 1,"yellow"], [pigments.blue, 0,"blue"]],
+	xwgryx: [ [pigments.black,0, "black"], [pigments.white,10,"white"], [pigments.gray, 2,"gray"], [pigments.red, 2,"red"], [pigments.yellow, 1,"yellow"], [pigments.blue, 0,"blue"]],
+	bwxxyx: [ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.gray, 0,"gray"], [pigments.red, 2,"red"], [pigments.yellow, 1,"yellow"], [pigments.blue, 0,"blue"]],
+	bwxxxx: [ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.gray, 0,"gray"], [pigments.red, 2,"red"], [pigments.yellow, 0,"yellow"], [pigments.blue, 0,"blue"]],
+};
+colorsets = tools.reifyWeightedArray(pigmentsets[pigmentchoice]);
+console.log(`colorsets=${colorsets}`);
+
 const layersmill = [
 	{ nrects: 1, nlines: 0, ncircles: 0 },
-	{ nrects: 0, nlines: 5, ncircles: 0 },
-	{ nrects: 0, nlines: 5, ncircles: 0 },
-	{ nrects: 0, nlines: 5, ncircles: 0 },
-	{ nrects: 0, nlines: 5, ncircles: 0 },
-	{ nrects: 0, nlines: 5, ncircles: 0 },
+	{ nrects: 0, nlines: 5, ncircles: 5 },
+	{ nrects: 0, nlines: 5, ncircles: 5 },
+	{ nrects: 0, nlines: 5, ncircles: 5 },
+	{ nrects: 0, nlines: 5, ncircles: 5 },
+	{ nrects: 0, nlines: 5, ncircles: 5 },
 ];
 algorithms = [{
 	id: prefix + "1637362139", //date +%s
@@ -100,7 +112,7 @@ algorithms = [{
 					let dash = tools.randominteger(0.05*min,0.4*min);
 					let space = tools.randominteger(0.1*min,0.4*min);
 					let width=0,height=0;
-					let x=width/2, y=height/2;
+					let x=p.width/2, y=p.height/2;
 					matrix.push({x,y,width,height,lineWidth:lineWidth[j],dash:dash,space:space,strokeOpacity:0,fillOpacity:1,strokeColor:color1,fillColor:color1});
 					return matrix;
 				}, []);
@@ -115,7 +127,7 @@ algorithms = [{
 						// let notcolor1 = colors.filter(c=>color1!==c);
 						// let color2 = notcolor1[tools.randominteger(0,notcolor1.length)];
 						matrix.push({x1:cx,x2:cx,y1:0,y2:height,lineWidth:lineWidth[j],dash:dash[j],space:space[j],strokeOpacity:1,fillOpacity:0,strokeColor:color1,fillColor:color2});;
-						matrix.push({x1:0,x2:width,y1:cy,y2:cy,lineWidth:lineWidth[j],dash:space[j],space:dash[j],strokeOpacity:1,fillOpacity:0,strokeColor:color2,fillColor:color1});
+						matrix.push({x1:cx,x2:cx,y1:cy,y2:cy,lineWidth:lineWidth[j],dash:space[j],space:dash[j],strokeOpacity:1,fillOpacity:0,strokeColor:color2,fillColor:color1});
 					}
 					return matrix;
 				}, []);
@@ -135,28 +147,16 @@ algorithms = [{
 			}, []);
 		return layers;
 	}
-},
+}
 ];
-pigmentsets = [
-//	[ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.blue, 0,"blue"], [pigments.yellow, 0,"yellow"], [pigments.red, 2,"red"]],
-//	[ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.blue, 0,"blue"], [pigments.yellow, 1,"yellow"], [pigments.red, 2,"red"]],
-//	[ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.blue, 0,"blue"], [pigments.yellow, 1,"yellow"], [pigments.red, 0,"red"]],
-	[ [pigments.black,6, "black"], [pigments.white,12,"white"], [pigments.blue, 0,"blue"], [pigments.yellow, 0,"yellow"], [pigments.red, 0,"red"]],
-];
-colorsets = pigmentsets.map(set => {
-	return tools.reifyWeightedArray(set);
-});
-
 const fps=24; // frames per second for ffmpeg
-const tpc=2*fps; // ticks per colorset
-const nticks=tpc*colorsets.length; 
-const nseconds = nticks/fps;
-let filmdir = "film" + timestamp;
+const nticks=48; 
+let filmdir = `film_${pigmentchoice}_${timestamp}`;
 if (!fs.existsSync(filmdir)){
     fs.mkdirSync(filmdir);
 }
 
-let colors = tools.shufflearray(colorsets[0]);
+let colors = tools.shufflearray(colorsets);
 let p = {
 	width: 1920,
 	height: 1080,
@@ -180,14 +180,12 @@ let numbers = [...Array(10).keys()].map(n=>n.toString());
 		file = count.toString().padStart(6, "0") + ".pdf";
 		let info = {id:file,timestamp:timestamp,datetimestr:datetimestr,directory:filmdir,npages:nticks,Author:"mctavish",Subject:"generative drawing series",Keywords: "net.art, webs, networks, generative, algorithmic" };
 		++count;
-		console.log(`count=${count}`);
 		let filmfile = prefix + file; 
 		let doc = new PDFDocument(
 		{ 
 			size: [p.width,p.height],
 			info: info,
 		});
-		console.log(`filmfile=${filmfile}`);
 		doc.pipe(fs.createWriteStream(filmdir+"/"+filmfile));
 		doc.rect(0, 0, p.width, p.height).fillColor(pigments.white).fill();
 		if(ntick===2 || ntick===nticks-2) {
@@ -206,6 +204,15 @@ let numbers = [...Array(10).keys()].map(n=>n.toString());
 					doc.rect(x, y, width, height).strokeColor(strokeColor).dash(dash, {space:space}).lineWidth(lineWidth).stroke();
 				}
 			});
+//			if(ntick===nticks-1) {
+//				doc.font("Courier-Bold");
+//				doc.fontSize(84);
+//				let text = `mctavish : ${datetimeISOstr}`;
+//				// doc.fillColor(p.colors[tools.randominteger(0,p.colors.length)]).text(text,p.width*.1, p.height*.1);
+//				console.log(text); 
+//				let color = p.colors[tools.randominteger(0,p.colors.length)];
+//				doc.fillOpacity(1.0).strokeOpacity(0.0).fillColor(color).strokeColor(color).text(text,p.width*.1, p.height*.1);
+//			}
 			layer.lines.forEach( (line,j) => {
 				let oldline = oldlayer.lines[j];
 				let { x1, x2, y1, y2, lineWidth, dash, space, strokeOpacity, fillOpacity, strokeColor, fillColor } = tools.tweenParameters(oldline,line,fps,nframe);
@@ -221,29 +228,8 @@ let numbers = [...Array(10).keys()].map(n=>n.toString());
 				}
 			});
 		});
-		let opacity=1.0;
-		if(count>nticks*fps-10) {
-			opacity=0.0+(nticks*fps-count)*0.1;
-		}
-		else if(count<10) {
-			opacity=0.0+count*0.1;
-		}
-		else {
-			opacity=1.0;
-		}
-		doc.font("Courier-Bold");
-		let text = `mctavish`;
-		// let fsize = p.width/(text.length + 2);
-		// let fsize = 128;
-		let fsize = (4/3)*p.width/(text.length + 2);
-		console.log(`fsize = ${fsize}`);
-		doc.fontSize(fsize);
-		let color = p.colors[tools.randominteger(0,p.colors.length)];
-		doc.fillOpacity(opacity).strokeOpacity(opacity).fillColor(pigments.red,opacity).strokeColor(pigments.red,opacity).text(text,p.width*.1,p.height*.2,{width:p.width*0.8,height:p.height});
-		//doc.moveDown();
-		//doc.fontSize(fsize*0.8).text(`#${timestamp}`);
 		doc.end();
-	})
+	});
 	return layers;
 },algorithms[1].draw(p));
 
