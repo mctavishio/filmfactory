@@ -2,7 +2,16 @@ const tools = require("./tools.js");
 module.exports = [
 {
 	id: "1645565647", //date +%s
+	transitionid: () => { return ["1647875263", "1647875520"][tools.randominteger(0,2)]; }, 
 	title: "squarepushpull",
+	layersmill: [
+			{ nrects: 1, nlines: 0, ncircles: 0 },
+			{ nrects: 0, nlines: 6, ncircles: 0 },
+			{ nrects: 0, nlines: 6, ncircles: 0 },
+			{ nrects: 0, nlines: 6, ncircles: 0 },
+			{ nrects: 0, nlines: 6, ncircles: 0 },
+			{ nrects: 0, nlines: 6, ncircles: 0 },
+	],
 	draw: p => {	
 		let width = p.width;
 		let height = p.height;
@@ -11,8 +20,7 @@ module.exports = [
 		let cx = width/2;
 		let cy = height/2;
 		let nc = 0;
-		let layersmill = p.layersmill;
-		let layers = layersmill.reduce( (layermatrix, layer, layerj) => {
+		let layers = p.layersmill.reduce( (layermatrix, layer, layerj) => {
 				let mill = [...Array(layer.nrects).keys()];
 				let rects = mill.reduce( (matrix,j) => {
 					let color1 = colors[++nc%colors.length];
@@ -30,7 +38,7 @@ module.exports = [
 				let x = cx; 
 				let y = cy;
 				let lines = mill.reduce( (matrix,j) => {
-					if(layerj<layersmill.length-2) {
+					if(layerj<p.layersmill.length-2) {
 						let color1 = colors[++nc%colors.length];
 						let color2 = colors[++nc%colors.length];
 						matrix.push({x1:x,x2:x,y1:0,y2:height,lineWidth:lineWidth[j],dash:dash[j],space:space[j],strokeOpacity:1,fillOpacity:0,strokeColor:color1,fillColor:color2});;
@@ -47,7 +55,7 @@ module.exports = [
 				let circles = mill.reduce( (matrix,j) => {
 					let color1 = colors[++nc%colors.length];
 					let color2 = colors[++nc%colors.length];
-					let fillOpacity = (layerj<layersmill.length-2 && j === mill.length-2) || (layerj === layersmill.length-1 && j === mill.length-1) ? 0 : 1;
+					let fillOpacity = (layerj<p.layersmill.length-2 && j === mill.length-2) || (layerj === p.layersmill.length-1 && j === mill.length-1) ? 0 : 1;
 					matrix.push({cx:cx,cy:cy,r:r[j],lineWidth:lineWidth[j],dash:dash[j],space:space[j],strokeOpacity:1,fillOpacity:fillOpacity,strokeColor:color1,fillColor:color2});
 					return matrix;
 				}, []);
@@ -59,6 +67,15 @@ module.exports = [
 {
 	id: "1637362139", //date +%s
 	title: "centercircle",
+	transitionid: () => { return ["1647628171"][0]; }, 
+	layersmill: [
+			{ nrects: 1, nlines: 0, ncircles: 0 },
+			{ nrects: 0, nlines: 5, ncircles: 5 },
+			{ nrects: 0, nlines: 5, ncircles: 5 },
+			{ nrects: 0, nlines: 5, ncircles: 5 },
+			{ nrects: 0, nlines: 5, ncircles: 5 },
+			{ nrects: 0, nlines: 5, ncircles: 5 },
+	],
 	draw: p => {	
 		let width = p.width;
 		let height = p.height;
@@ -68,7 +85,7 @@ module.exports = [
 		let cy = height/2;
 		let nc = 0;
 		let layersmill = p.layersmill;
-		let layers = layersmill.reduce( (layermatrix, layer, layerj) => {
+		let layers = p.layersmill.reduce( (layermatrix, layer, layerj) => {
 				let mill = [...Array(layer.nrects).keys()];
 				let rects = mill.reduce( (matrix,j) => {
 					let color1 = colors[++nc%colors.length];
@@ -84,11 +101,9 @@ module.exports = [
 				let dash = mill.map(n=>tools.randominteger(0.1*min,0.6*min)).sort( (a,b) => b-a );
 				let space = mill.map(n=>tools.randominteger(0.1*min,0.6*min)).sort( (a,b) => b-a );
 				let lines = mill.reduce( (matrix,j) => {
-					if(layerj<layersmill.length-2) {
+					if(layerj<p.layersmill.length-2) {
 						let color1 = colors[++nc%colors.length];
 						let color2 = colors[++nc%colors.length];
-						// let notcolor1 = colors.filter(c=>color1!==c);
-						// let color2 = notcolor1[tools.randominteger(0,notcolor1.length)];
 						matrix.push({x1:cx,x2:cx,y1:0,y2:height,lineWidth:lineWidth[j],dash:dash[j],space:space[j],strokeOpacity:1,fillOpacity:0,strokeColor:color1,fillColor:color2});;
 						matrix.push({x1:0,x2:width,y1:cy,y2:cy,lineWidth:lineWidth[j],dash:space[j],space:dash[j],strokeOpacity:1,fillOpacity:0,strokeColor:color2,fillColor:color1});
 					}
@@ -103,9 +118,7 @@ module.exports = [
 				let circles = mill.reduce( (matrix,j) => {
 					let color1 = colors[++nc%colors.length];
 					let color2 = colors[++nc%colors.length];
-					// let notcolor1 = colors.filter(c=>color1!==c);
-					// let color2 = notcolor1[tools.randominteger(0,notcolor1.length)];
-					let fillOpacity = (layerj<layersmill.length-2 && j === mill.length-2) || (layerj === layersmill.length-1 && j === mill.length-1) ? 0 : 1;
+					let fillOpacity = (layerj<p.layersmill.length-2 && j === mill.length-2) || (layerj === p.layersmill.length-1 && j === mill.length-1) ? 0 : 1;
 					matrix.push({cx:cx,cy:cy,r:r[j],lineWidth:lineWidth[j],dash:dash[j],space:space[j],strokeOpacity:1,fillOpacity:fillOpacity,strokeColor:color1,fillColor:color2});
 					return matrix;
 				}, []);

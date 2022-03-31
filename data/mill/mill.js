@@ -9,146 +9,139 @@ const tweens = require("./tweens.js");
 const transitions = require("./transitions.js");
 const algorithms = require("./algorithms.js");
 // const [nodepath,codepath,algorithmid="1645417729",seedid="1647279261"] = process.argv;
-const [nodepath,codepath,scoreid="score1647644856"] = process.argv;
+const [nodepath,codepath,scoreid="score1648681452"] = process.argv;
 const prefix = "film";
 const datetime = new Date();
 const timestamp = datetime.getTime();
+//const score = require("./scores")(timestamp);
 const score = require(`./${scoreid}`)(timestamp);
 const datetimestr = datetime.toDateString();
 const datetimeISOstr = datetime.toISOString();
-
-let filmseqdir = `filmseq${timestamp}`;
-if (!fs.existsSync(filmseqdir)){
-    fs.mkdirSync(filmseqdir);
+let pigments = score.pigments;
+let pigmentsets = score.pigmentsets;
+// { id, printrunid, films, tween, changelayer } = score;
+let scoredir = score.printrunid;
+if (!fs.existsSync(scoredir)){
+	fs.mkdirSync(scoredir);
 }
-
-let
-nextsteps = "";
-let nextstepsfile = `nextsteps${filmseqdir}.sh`;
+let nextsteps = "";
+let nextstepsfile = `nextsteps${scoredir}.sh`;
 // for each film in score ...
 score.films.forEach( (film,f) => {
+	// { id, algorithmid, pigmentset, text, nticks } = film; 
 	console.log("f="+f);
-	console.log("film.algorithm="+film.algorithm);
-	console.log("film.start="+film.start);
-	console.log("film.end="+film.end);
-	let pigments = score.pigments;
-	colorsets = tools.reifyWeightedArray(film.pigmentset);
-	console.log(`colorsets=${colorsets}`);
-	const fps=24; // frames per second for ffmpeg
-	const nticks=film.nticks; 
-	let filmdir = `film${f.toString.padStart(3, "0")}`;
-	if (!fs.existsSync(filmdir)){
-		fs.mkdirSync(filmdir);
-	}
-
-	let colors = tools.shufflearray(colorsets);
-	let p = {
-		width: 1920,
-		height: 1080,
-		min: 1080,
-		max: 1920,
-		fsize: 128,
-		layersmill: film.layersmill,
-		colors: colors
-	};
-	let count = 0;
-	let numbers = [...Array(10).keys()].map(n=>n.toString());
-	//console.log(JSON.stringify(film));
-	//console.log("start="+JSON.stringify(transitions.filter(x=>x.id===film.start)[0]));
-	//console.log("end="+JSON.stringify(transitions.filter(x=>x.id===film.end)[0]));
-	//console.log("algorithms="+JSON.stringify(algorithms.filter(x=>x.id===film.algorithm)[0]));
-	[...Array(nticks).keys()].reduce( (oldtick, ntick) => {
-		//console.log("ntick="+ntick);
-		//console.log("oldtick = "+JSON.stringify(oldtick));
-		if(ntick===nticks-1) {
-			layers = transitions.filter(x=>x.id===film.end)[0].draw(p);
+		//let { id, transitionid, title, draw } = algorithms.filter(x=>x.id===algorithmid)[0];
+		let algorithm = algorithms.filter(x=>x.id===film.algorithmid)[0];
+		let transitionid = algorithm.transitionid();
+//		console.log("transitionid="+transitionid);
+		let transition = transitions.filter(x=>x.id===transitionid)[0];
+		colorsets = tools.reifyWeightedArray(film.pigmentset);
+//		console.log(`colorsets=${colorsets}`);
+		let fps=24; // frames per second for ffmpeg
+		let nticks = film.nticks; 
+		let filmdir = film.id;
+		if (!fs.existsSync(scoredir+"/"+filmdir)){
+			fs.mkdirSync(scoredir+"/"+filmdir);
 		}
-		else {
-			let newlayers = algorithms.filter(x=>x.id===film.algorithm)[0].draw(p);
-		//console.log("newlayers = "+JSON.stringify(newlayers));
-			//let newlayers = algorithms[film.algorithm].draw(p);
-			layers = newlayers.map( (newlayer,j) => {
-				return film.changelayer(j,newlayers.length,ntick,nticks) ? newlayer : oldtick[j]; 
-			});
-		}
-		[...Array(fps).keys()].map( (nframe) => {
-			file = count.toString().padStart(6, "0") + ".pdf";
-			let info = {id:file,timestamp:timestamp,datetimestr:datetimestr,directory:filmdir,npages:nticks,Author:"mctavish",Subject:"generative drawing series",Keywords: "net.art, webs, networks, generative, algorithmic" };
-			++count;
-			let filmfile = `frame${file}`;
-			let doc = new PDFDocument(
-			{ 
-				size: [p.width,p.height],
-				info: info,
-			});
-			doc.pipe(fs.createWriteStream(filmdir+"/"+filmfile));
-			doc.rect(0, 0, p.width, p.height).fillColor(pigments.white).fill();
-			/*
-			if(ntick===2 || ntick===nticks-2) {
-				layers = algorithms[film.algorithm].draw(p);
-				oldtick = layers;
+		let colors = tools.shufflearray(colorsets);
+		let p = {
+			width: 1920,
+			height: 1080,
+			min: 1080,
+			max: 1920,
+			fsize: 128,
+			layersmill: algorithm.layersmill,
+			colors: colors
+		};
+		let count = 0;
+//		let numbers = [...Array(10).keys()].map(n=>n.toString());
+		[...Array(nticks).keys()].reduce( (oldtick, ntick) => {
+			let istween = score.istween(ntick,nticks); 
+			let layers = [];
+			if(ntick===nticks-1) {
+				layers = transition.draw(p);
 			}
-			*/
-			let ntween =film.tween(ntick,nticks); 
-			layers.forEach( (layer,l) => {
-				let oldlayer = oldtick[l];
-				layer.rects.forEach( (rect,j) => {
-					let oldrect = oldlayer.rects[j];
-					let nextp = tweens[ntweens](oldrect,rect,fps,nframe);
-					let { x, y, width, height, lineWidth, dash, space, strokeOpacity, fillOpacity, strokeColor, fillColor } = tweens[n](oldrect,rect,fps,nframe);
-					if(fillOpacity!==0) {
-						doc.rect(x, y, width, height).fillColor(fillColor).fill();
-					}
-					if(strokeOpacity!==0) {
-						doc.rect(x, y, width, height).strokeColor(strokeColor).dash(dash, {space:space}).lineWidth(lineWidth).stroke();
-					}
+			else {
+				let newlayers = algorithm.draw(p);
+				layers = newlayers.map( (newlayer,j) => {
+					return score.changelayer(j,newlayers.length,ntick,nticks) ? newlayer : oldtick[j]; 
 				});
-				layer.lines.forEach( (line,j) => {
-					let oldline = oldlayer.lines[j];
-					//console.log("**=oldline"+JSON.stringify(oldline));
-					let nextp = tweens[ntween](oldline,line,fps,nframe);
-					//let { x1, x2, y1, y2, lineWidth, dash, space, strokeOpacity, fillOpacity, strokeColor, fillColor } = tweens[film.tween(ntick,nticks)](oldline,line,fps,nframe);
-					let { x1, x2, y1, y2, lineWidth, dash, space, strokeOpacity, fillOpacity, strokeColor, fillColor } = nextp; 
-					doc.moveTo(x1,y1).lineTo(x2,y2).strokeColor(strokeColor).dash(dash, {space:space}).lineWidth(lineWidth).stroke();
+			};
+			let ntween = score.tween(ntick,nticks); 
+			[...Array(fps).keys()].forEach( (nframe) => {
+				file = count.toString().padStart(6, "0") + ".pdf";
+				let info = {id:film.id,timestamp,datetimestr,directory:filmdir,npages:nticks,Author:"mctavish",Subject:"generative drawing series",Keywords: "net.art, webs, networks, generative, algorithmic" };
+				++count;
+				let filmfile = `${scoredir}/${filmdir}/frame${file}`;
+				//console.log("filmfile = "+filmfile);
+				let doc = new PDFDocument(
+				{ 
+					size: [p.width,p.height],
+					info: info,
 				});
-				layer.circles.forEach( (circ,j) => {
-					let oldcirc = oldlayer.circles[j];
-					let nextp = tweens[ntween](oldcirc,circ,fps,nframe);
-					let { cx, cy, r, lineWidth, dash, space, strokeOpacity, fillOpacity, strokeColor, fillColor } = tweens[n](oldcirc,circ,fps,nframe);
-					if(fillOpacity!==0) {
-						doc.circle(cx, cy, r).fillColor(fillColor).fillOpacity(1).fill();	
-					}
-					if(strokeOpacity!==0) {
-						doc.circle(cx, cy, r).fillOpacity(0).strokeColor(strokeColor).dash(dash, {space:space}).lineWidth(lineWidth).stroke();
-					}
+				doc.pipe(fs.createWriteStream(filmfile));
+				doc.rect(0, 0, p.width, p.height).fillColor(pigments.white).fill();
+				if(istween) {
+					layers = algorithm.draw(p);
+					oldtick = layers;
+				}
+				layers.forEach( (layer,l) => {
+					let oldlayer = oldtick[l];
+					layer.rects.forEach( (rect,j) => {
+						let oldrect = oldlayer.rects[j];
+						let nextp = tweens[ntween](oldrect,rect,fps,nframe);
+						let { x, y, width, height, lineWidth, dash, space, strokeOpacity, fillOpacity, strokeColor, fillColor } = nextp; 
+						if(fillOpacity!==0) {
+							doc.rect(x, y, width, height).fillColor(fillColor).fill();
+						}
+						if(strokeOpacity!==0) {
+							doc.rect(x, y, width, height).strokeColor(strokeColor).dash(dash, {space:space}).lineWidth(lineWidth).stroke();
+						}
+					});
+					layer.lines.forEach( (line,j) => {
+						let oldline = oldlayer.lines[j];
+						let nextp = tweens[ntween](oldline,line,fps,nframe);
+						let { x1, x2, y1, y2, lineWidth, dash, space, strokeOpacity, fillOpacity, strokeColor, fillColor } = nextp; 
+						doc.moveTo(x1,y1).lineTo(x2,y2).strokeColor(strokeColor).dash(dash, {space:space}).lineWidth(lineWidth).stroke();
+					});
+					layer.circles.forEach( (circ,j) => {
+						let oldcirc = oldlayer.circles[j];
+						let nextp = tweens[ntween](oldcirc,circ,fps,nframe);
+						let { cx, cy, r, lineWidth, dash, space, strokeOpacity, fillOpacity, strokeColor, fillColor } = nextp; 
+						if(fillOpacity!==0) {
+							doc.circle(cx, cy, r).fillColor(fillColor).fillOpacity(1).fill();	
+						}
+						if(strokeOpacity!==0) {
+							doc.circle(cx, cy, r).fillOpacity(0).strokeColor(strokeColor).dash(dash, {space:space}).lineWidth(lineWidth).stroke();
+						}
+					});
 				});
+				if(film.text[0]!=="" || film.text[1]!=="") {
+					let opacity=1.0;
+					if(count>nticks*fps-10) {
+						opacity=0.0+(nticks*fps-count)*0.1;
+					}
+					else if(count<10) {
+						opacity=0.0+count*0.1;
+					}
+					else {
+						opacity=1.0;
+					}
+					doc.font("Courier-Bold");
+					let fsize = p.fsize;
+					if(film.text[1]!=="") {
+						doc.fontSize(fsize);
+						doc.fillOpacity(opacity).strokeOpacity(opacity).fillColor(pigments.red).strokeColor(pigments.red).text(film.text[0],p.width*.0,p.height*.3,{align: 'center', width:p.width,height:p.height});
+					}
+					if(film.text[1]!=="") {
+						doc.fontSize(fsize*.6);
+						doc.fillOpacity(opacity).strokeOpacity(opacity).fillColor(pigments.red).strokeColor(pigments.red).text(film.text[1],p.width*.0,p.height*.6,{align: 'center', width:p.width,height:p.height});
+					}
+				}
+				doc.end();
 			});
-			if(film.text!=="") {
-				let opacity=1.0;
-				if(count>nticks*fps-10) {
-					opacity=0.0+(nticks*fps-count)*0.1;
-				}
-				else if(count<10) {
-					opacity=0.0+count*0.1;
-				}
-				else {
-					opacity=1.0;
-				}
-				doc.font("Courier-Bold");
-				let fsize = p.fsize;
-				doc.fontSize(fsize);
-				let color = p.colors[tools.randominteger(0,p.colors.length)];
-				doc.fillOpacity(opacity).strokeOpacity(opacity).fillColor(pigments.red,opacity).strokeColor(pigments.red,opacity).text(film.text,p.width*.0,p.height*.3,{align: 'center', width:p.width,height:p.height});
-				if(film.text2!=="") {
-					doc.fontSize(fsize*.6);
-					// doc.moveDown();
-					doc.fillOpacity(opacity).strokeOpacity(opacity).fillColor(pigments.red,opacity).strokeColor(pigments.red,opacity).text(film.text2,p.width*.0,p.height*.6,{align: 'center', width:p.width,height:p.height});
-				}
-			}
-			doc.end();
-		});
-		return layers;
-	},transitions.filter(x=>x.id===film.start)[0].draw(p) );
+			return layers;
+		},transition.draw(p) );
 
 	nextsteps = nextsteps + `
 	cd ${filmdir}
@@ -161,17 +154,18 @@ score.films.forEach( (film,f) => {
 	echo "file './${filmdir}/film.mp4'" >> filmfiles.txt 
 	`;
 });
-nextsteps = nextsteps + `
-cp ${nextstepsfile} ${filmseqdir}/nextsteps.sh
-cp ${millfile} ${filmseqdir}/${millfile}
-`;
-console.log(`gsutil -m cp -r ${filmseqdir} gs://filmfactory/`);
-console.log(`cd ${filmseqdir}`);
-console.log(`bash ${nextstepsfile}`);
-fs.writeFileSync(nextstepsfile, nextsteps, (err) => {
-  if (err)
-    console.log(err);
-  else {
-    console.log("File written successfully\n");
-  }
-});
+	nextsteps = nextsteps + `
+	cp ${nextstepsfile} ${scoredir}/nextsteps.sh
+	cp ${millfile} ${scoredir}/${millfile}
+	`;
+	//console.log(`gsutil -m cp -r ${scoredir} gs://filmfactory/`);
+	//console.log(`cd ${scoredir}`);
+	//console.log(`bash ${nextstepsfile}`);
+//	fs.writeFileSync(nextstepsfile, nextsteps, (err) => {
+//	  if (err)
+//		console.log(err);
+//	  else {
+//		console.log("File written successfully\n");
+//	  }
+//	});
+//});

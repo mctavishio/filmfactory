@@ -28,7 +28,7 @@ module.exports = [
 	},
 	// more jerky tween 
 	(p1,p2,nsteps,t) => {
-		let m = 2*Math.floor(t/2)/nsteps;
+		let m = 4*Math.floor(t/4)/nsteps;
 		let pt = Object.keys(p1).reduce( (ptacc,key) => {
 			//console.log("p1[key]"+key+" " + p1[key]);
 			if(isNaN(p1[key])) {
