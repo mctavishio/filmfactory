@@ -3,8 +3,8 @@ module.exports = [
 	//smooth linear tween
 	(p1,p2,nsteps,t) => {
 		let m = t/nsteps;
+//		console.log("p1="+JSON.stringify(p1));
 		let pt = Object.keys(p1).reduce( (ptacc,key) => {
-			//console.log("p1[key]"+key+" " + p1[key]);
 			if(isNaN(p1[key])) {
 				ptacc[key] = t>nsteps-3 ? [p1[key],p2[key]][Math.floor(Math.random() * 2)] : p1[key];
 			}

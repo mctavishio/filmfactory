@@ -9,13 +9,14 @@ const tweens = require("./tweens.js");
 const transitions = require("./transitions.js");
 const algorithms = require("./algorithms.js");
 // const [nodepath,codepath,algorithmid="1645417729",seedid="1647279261"] = process.argv;
+const [nodepath,codepath,scoreid="score1648681452"] = process.argv;
 const prefix = "film";
 const datetime = new Date();
-const timestampnow = datetime.getTime();
+const timestamp = datetime.getTime();
+//const score = require("./scores")(timestamp);
+const score = require(`./${scoreid}`)(timestamp);
 const datetimestr = datetime.toDateString();
 const datetimeISOstr = datetime.toISOString();
-const [nodepath,codepath,scoreid="score1648681452",timestamp=timestampnow] = process.argv;
-const score = require(`./${scoreid}`)(timestampnow);
 let pigments = score.pigments;
 let pigmentsets = score.pigmentsets;
 // { id, printrunid, films, tween, changelayer } = score;
@@ -32,8 +33,10 @@ score.films.forEach( (film,f) => {
 		//let { id, transitionid, title, draw } = algorithms.filter(x=>x.id===algorithmid)[0];
 		let algorithm = algorithms.filter(x=>x.id===film.algorithmid)[0];
 		let transitionid = algorithm.transitionid();
+//		console.log("transitionid="+transitionid);
 		let transition = transitions.filter(x=>x.id===transitionid)[0];
 		colorsets = tools.reifyWeightedArray(film.pigmentset);
+//		console.log(`colorsets=${colorsets}`);
 		let fps=24; // frames per second for ffmpeg
 		let nticks = film.nticks; 
 		let filmdir = film.id;
@@ -81,8 +84,7 @@ score.films.forEach( (film,f) => {
 				if(!istween) {
 					let newlayers = algorithm.draw(p);
 					layers = newlayers.map( (newlayer,j) => {
-						return (j>newlayers.length/2 || score.changelayer(j,newlayers.length,ntick,nticks)) ? newlayer : oldtick[j]; 
-						//return j>newlayers.length/2 ? newlayer : oldtick[j]; 
+						return score.changelayer(j,newlayers.length,ntick,nticks) ? newlayer : oldtick[j]; 
 					});
 					oldtick = layers;
 				}

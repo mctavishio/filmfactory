@@ -10,7 +10,7 @@ module.exports = [
 			{ nrects: 0, nlines: 6, ncircles: 0 },
 			{ nrects: 0, nlines: 6, ncircles: 0 },
 			{ nrects: 0, nlines: 8, ncircles: 0 },
-			{ nrects: 0, nlines: 6, ncircles: 0 },
+			{ nrects: 0, nlines: 8, ncircles: 0 },
 	],
 	draw: p => {	
 		let width = p.width;
@@ -52,7 +52,7 @@ module.exports = [
 						let color2 = notcolors[++nc%notcolors.length];
 						matrix.push({x1:x,x2:x,y1:0,y2:height,lineWidth:lineWidth[j],dash:dash[j],space:space[j],strokeOpacity:1,fillOpacity:0,strokeColor:color1,fillColor:color2});;
 						matrix.push({x1:0,x2:width,y1:y,y2:y,lineWidth:lineWidth[j],dash:space[j],space:dash[j],strokeOpacity:1,fillOpacity:0,strokeColor:color2,fillColor:color1});
-				}
+					}
 					//console.log(JSON.stringify(matrix));
 					return matrix;
 				}, []);

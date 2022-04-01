@@ -10,7 +10,7 @@ module.exports = [
 			{ nrects: 0, nlines: 6, ncircles: 0 },
 			{ nrects: 0, nlines: 6, ncircles: 0 },
 			{ nrects: 0, nlines: 8, ncircles: 0 },
-			{ nrects: 0, nlines: 6, ncircles: 0 },
+			{ nrects: 0, nlines: 8, ncircles: 0 },
 	],
 	draw: p => {	
 		let width = p.width;
@@ -32,28 +32,21 @@ module.exports = [
 					return matrix;
 				}, []);
 				mill = [...Array(layer.nlines).keys()];
-				let mult = mill.map(n=>tools.randominteger(1,2)).sort( (a,b) => b-a );
-				let lineWidth = mill.map(n=> tools.randominteger(0.01*min,0.6*min)).sort( (a,b) => b-a );
-				//let lineWidth = mill.map(n=> tools.randominteger(0.01*mult[n]*min,0.4*mult[n]*min)).sort( (a,b) => b-a );
-					lineWidth[0]=tools.randominteger(0.6*min,min);;
-					lineWidth[1]=tools.randominteger(0.5*min,min);;
-					lineWidth[2]=tools.randominteger(0.4*min,min);
-				//let space = mill.map(n=>tools.randominteger(0.03*min,0.5*min)).sort( (a,b) => b-a );
-				//let dash = mill.map(n=>tools.randominteger(0.01*min,0.4*min)).sort( (a,b) => b-a );
-				let space = mill.map(n=>tools.randominteger(0.03*min,0.6*min));
-				let dash = mill.map(n=>tools.randominteger(0.01*min,0.3*min));
+				let lineWidth = mill.map(n=>tools.randominteger(0.01*min,0.6*min)).sort( (a,b) => b-a );
+				lineWidth[0]=max;
+				lineWidth[1]=min;
+				lineWidth[2]=tools.randominteger(0.6*min,min);
+				let dash = mill.map(n=>tools.randominteger(0.03*min,0.5*min)).sort( (a,b) => b-a );
+				let space = mill.map(n=>tools.randominteger(0.03*min,0.5*min)).sort( (a,b) => b-a );
 				let x = cx; 
 				let y = cy;
 				let lines = mill.reduce( (matrix,j) => {
 					if(layerj<p.layersmill.length-2) {
 						let color1 = colors[++nc%colors.length];
-						//let notcolors = colors.filter(c=>c!==color1);
-						notcolors = colors;
-						let color2 = notcolors[++nc%notcolors.length];
+						let color2 = colors[++nc%colors.length];
 						matrix.push({x1:x,x2:x,y1:0,y2:height,lineWidth:lineWidth[j],dash:dash[j],space:space[j],strokeOpacity:1,fillOpacity:0,strokeColor:color1,fillColor:color2});;
 						matrix.push({x1:0,x2:width,y1:y,y2:y,lineWidth:lineWidth[j],dash:space[j],space:dash[j],strokeOpacity:1,fillOpacity:0,strokeColor:color2,fillColor:color1});
-				}
-					//console.log(JSON.stringify(matrix));
+					}
 					return matrix;
 				}, []);
 				mill = [...Array(layer.ncircles).keys()];
