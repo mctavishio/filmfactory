@@ -18,6 +18,7 @@ const [nodepath,codepath,scoreid="score1648681452",timestamp=timestampnow] = pro
 const score = require(`./${scoreid}`)(timestampnow);
 let pigments = score.pigments;
 let pigmentsets = score.pigmentsets;
+let bgcolor = score.bgcolor ? score.bgcolor : pigments.white;
 // { id, printrunid, films, tween, changelayer } = score;
 let scoredir = score.printrunid;
 if (!fs.existsSync(scoredir)){
@@ -77,7 +78,7 @@ score.films.forEach( (film,f) => {
 					info: info,
 				});
 				doc.pipe(fs.createWriteStream(filmfile));
-				doc.rect(0, 0, p.width, p.height).fillColor(pigments.white).fill();
+				doc.rect(0, 0, p.width, p.height).fillColor(bgcolor).fill();
 				if(!istween) {
 					let newlayers = algorithm.draw(p);
 					layers = newlayers.map( (newlayer,j) => {

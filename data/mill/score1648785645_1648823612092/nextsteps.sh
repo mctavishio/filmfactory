@@ -8,7 +8,6 @@ do
 	echo "done with $f"
 	cd ..
 	echo "file './$f/film.mp4'" >> filmfiles.txt
-	echo "file './$f/film.mp4'" >> filmfiles_extra.txt
 done
 cd film_extra 
 for file in *.pdf; do magick convert $file -resize 1920 $file.png; done;
@@ -17,5 +16,4 @@ ffmpeg -framerate 24 -i frame%06d.png -c:v libx264 -r 24 -pix_fmt yuv420p film.m
 rm *.png
 echo "done with film_extra"
 cd ..
-echo "file './film_extra/film.mp4'" >> filmfiles_extra.txt
 ffmpeg -f concat -safe 0 -i filmfiles.txt -c copy film_silent.mp4
