@@ -4,7 +4,7 @@ module.exports = timestamp => {
 	const datetime = new Date(timestamp);
 	const datetimestr = datetime.toDateString();
 	const datetimeISOstr = datetime.toISOString();
-	const scoreid = "score1648777072";
+	const scoreid = "score1648777072_shim";
 	const printrunid = `${scoreid}_${timestamp}`;
 	const pigments= {
 		black: "#191918",
@@ -22,11 +22,12 @@ module.exports = timestamp => {
 		xwgryx_001002020100: [ [pigments.black,0, "black"], [pigments.white,10,"white"], [pigments.gray, 2,"gray"], [pigments.red, 2,"red"], [pigments.yellow, 1,"yellow"], [pigments.blue, 0,"blue"]],
 		bwxxyx_061200000200: [ [pigments.black,5, "black"], [pigments.white,12,"white"], [pigments.gray, 0,"gray"], [pigments.red, 0,"red"], [pigments.yellow, 2,"yellow"], [pigments.blue, 0,"blue"]],
 		bwxxxx_061200000000: [ [pigments.black,5, "black"], [pigments.white,12,"white"], [pigments.gray, 0,"gray"], [pigments.red, 0,"red"], [pigments.yellow, 0,"yellow"], [pigments.blue, 0,"blue"]],
+		bwgxxx_061204000000: [ [pigments.black,5, "black"], [pigments.white,12,"white"], [pigments.gray, 4,"gray"], [pigments.red, 0,"red"], [pigments.yellow, 0,"yellow"], [pigments.blue, 0,"blue"]],
 		bwxxxb_061200000004: [ [pigments.black,5, "black"], [pigments.white,12,"white"], [pigments.gray, 0,"gray"], [pigments.red, 0,"red"], [pigments.yellow, 0,"yellow"], [pigments.blue, 4,"blue"]],
 	};
 	//bwgryb = black white gray red yellow blue x ::: not present
 	let algorithm=algorithms[0];
-	let films = ["bwxrxx_061200030000", "bwxrxx_061200010000", "bwxxyx_061200000200", "bwxrxx_061200030000"].map( (psetkey,k) => {
+	let films = ["bwgxxx_061204000000", "bwgxxx_061204000000", "bwgxxx_061204000000", "bwgxxx_061204000000"].map( (psetkey,k) => {
 		return {
 			id: `film_${k.toString().padStart(3,"0")}`,
 			algorithmid: algorithm.id,
